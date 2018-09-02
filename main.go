@@ -32,6 +32,8 @@ func main() {
 	for _, cg := range f.Comments {
 		comments = append(comments, cg)
 	}
+	cmap := ast.NewCommentMap(fset, f, f.Comments)
+
 	ast.Inspect(f, func(n ast.Node) bool {
 		switch nt := n.(type) {
 		case *ast.FuncDecl:
@@ -47,10 +49,14 @@ func main() {
 				comments = append(comments, cg)
 			}
 		case *ast.GenDecl:
+			comment := ""
+			if cg, ok := cmap[nt]; ok {
+				comment = cg[0].Text()
+			}
 			for _, spec := range nt.Specs {
 				switch spt := spec.(type) {
 				case *ast.TypeSpec:
-					if spt.Name.IsExported() && checkComment(spt.Doc.Text(), spt.Name.Name) {
+					if spt.Name.IsExported() && checkComment(comment, spt.Name.Name) {
 						comment := &ast.Comment{
 							Text:  fmt.Sprintf("//%s is TODO: need to enter a comment", spt.Name),
 							Slash: nt.TokPos - 1,
@@ -63,7 +69,7 @@ func main() {
 					}
 				case *ast.ValueSpec:
 					for _, name := range spt.Names {
-						if name.IsExported() && checkComment(nt.Doc.Text(), name.Name) {
+						if name.IsExported() && checkComment(comment, name.Name) {
 							var pos token.Pos
 							if nt.Lparen == 0 {
 								pos = nt.Pos()
