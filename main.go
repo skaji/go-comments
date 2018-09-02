@@ -39,7 +39,7 @@ func main() {
 		case *ast.FuncDecl:
 			if nt.Name.IsExported() && checkComment(nt.Doc.Text(), nt.Name.Name) {
 				comment := &ast.Comment{
-					Text:  fmt.Sprintf("//%s is TODO: need to enter a comment", nt.Name),
+					Text:  fmt.Sprintf("// %s is", nt.Name),
 					Slash: nt.Pos() - 1,
 				}
 				cg := &ast.CommentGroup{
@@ -58,7 +58,7 @@ func main() {
 				case *ast.TypeSpec:
 					if spt.Name.IsExported() && checkComment(comment, spt.Name.Name) {
 						comment := &ast.Comment{
-							Text:  fmt.Sprintf("//%s is TODO: need to enter a comment", spt.Name),
+							Text:  fmt.Sprintf("// %s is", spt.Name),
 							Slash: nt.TokPos - 1,
 						}
 						cg := &ast.CommentGroup{
@@ -77,7 +77,7 @@ func main() {
 								pos = name.Pos()
 							}
 							comment := &ast.Comment{
-								Text:  fmt.Sprintf("//%s is TODO: need to enter a comment", name.Name),
+								Text:  fmt.Sprintf("// %s is", name.Name),
 								Slash: pos - 1,
 							}
 							cg := &ast.CommentGroup{
