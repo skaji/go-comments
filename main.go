@@ -49,14 +49,14 @@ func main() {
 				comments = append(comments, cg)
 			}
 		case *ast.GenDecl:
-			comment := ""
+			genComment := ""
 			if cg, ok := cmap[nt]; ok {
-				comment = cg[0].Text()
+				genComment = cg[0].Text()
 			}
 			for _, spec := range nt.Specs {
 				switch spt := spec.(type) {
 				case *ast.TypeSpec:
-					if spt.Name.IsExported() && checkComment(comment, spt.Name.Name) {
+					if spt.Name.IsExported() && checkComment(genComment, spt.Name.Name) {
 						comment := &ast.Comment{
 							Text:  fmt.Sprintf("// %s is", spt.Name),
 							Slash: nt.TokPos - 1,
@@ -68,6 +68,12 @@ func main() {
 						comments = append(comments, cg)
 					}
 				case *ast.ValueSpec:
+					comment := genComment
+					if comment == "" {
+						if cg, ok := cmap[spec]; ok {
+							comment = cg[0].Text()
+						}
+					}
 					for _, name := range spt.Names {
 						if name.IsExported() && checkComment(comment, name.Name) {
 							var pos token.Pos
